@@ -1,0 +1,198 @@
+#include <iostream>
+using namespace std;
+struct node
+{
+    string name;
+    string tel_num;
+    node* left, *right;
+};
+node* insert(node* root, string c_name, string c_num)
+{
+    if (root == nullptr)
+    {
+        node* newnode = new node;
+        newnode->name = c_name;
+        newnode->tel_num = c_num;
+        newnode->left = nullptr;
+        newnode->right = nullptr;
+        return newnode;
+    }
+
+    if (c_name<root->name )
+    {
+        root->left = insert(root->left, c_name, c_num);
+    }
+    else
+    {
+        root->right = insert(root->right, c_name, c_num);
+    }
+    return root;
+}
+node* find_max(node* root)
+{
+    if (root == nullptr)
+        return nullptr;
+    else if (root->right == nullptr)
+        return root;
+    else
+        return find_max(root->right);
+}
+node* del(node* root, string key)
+{
+    if (root == nullptr)
+    {
+        return nullptr;
+    }
+
+    if (key < root->name)
+    {
+        root->left = del(root->left, key);
+    }
+    else if (key > root->name)
+    {
+        root->right = del(root->right, key);
+    }
+    else
+    {
+        if (root->left == nullptr && root->right == nullptr)
+        {
+            delete root;
+            root = nullptr;
+        }
+        else if (root->left != nullptr && root->right == nullptr)
+        {
+            node* temp = root;
+            root = root->left;
+            delete temp;
+        }
+        else if (root->left == nullptr && root->right != nullptr)
+        {
+            node* temp = root;
+            root = root->right;
+            delete temp;
+        }
+        else
+        {
+            node* max = find_max(root->left);
+            root->tel_num = max->tel_num;
+            root->name = max->name;
+            root->left = del(root->left, max->name);
+        }
+    }
+
+    return root;
+}
+node* search(node* root, string user)
+{
+    if (root == nullptr)
+    {
+        return nullptr;
+    }
+    else if (root->name == user)
+    {
+        return root;
+    }
+    else if (root->name < user)
+    {
+        return search(root->right, user);
+    }
+    else
+    {
+        return search(root->left, user);
+    }
+}
+
+
+void display(node* root)
+{
+    if (root != nullptr)
+    {
+        display(root->left);
+        cout << root->name << " ";
+        cout << root->tel_num << "\n";
+        display(root->right);
+    }
+}
+
+int main()
+{
+    node* root = nullptr;
+        char choice;
+    do
+    {
+        cout << "Menu:\n";
+        cout << "1. Insert\n";
+        cout << "2. Delete\n";
+        cout << "3. Search\n";
+        cout << "4. Display\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice)
+        {
+            case '1':
+            {
+                string name, tel_num;
+                cout << "Enter name: ";
+                cin >> name;
+                cout << "Enter telephone number: ";
+                cin >> tel_num;
+                root = insert(root, name, tel_num);
+                break;
+            }
+            case '2':
+            {
+                string deleteName;
+                cout << "Enter Name to Delete: ";
+                cin >> deleteName;
+                node *result = search(root, deleteName);
+                if (result == nullptr)
+                {
+                    cout << "Entry for " << deleteName << " not found." << endl;
+                }
+                else
+                {
+                    root = del(root, deleteName);
+                    cout << "Entry for " << deleteName << " deleted." << endl;
+                }
+                break;
+            }
+            case '3':
+            {
+                string search_name;
+                cout << "Enter name to search: ";
+                cin >> search_name;
+                node* result = search(root, search_name);
+                if (result != nullptr)
+                {
+                    cout << "Found: " << result->name << "\t" << result->tel_num << endl;
+                }
+                else
+                {
+                    cout << "Not found." << endl;
+                }
+                break;
+            }
+            case '4':
+                cout << "phone book contacts :" << endl;
+                if (root==nullptr)
+                {
+                    cout<<"No contacts!\n";
+                }
+                else
+                {
+                    display(root);
+                    cout << endl;
+                }
+                break;
+            case '5':
+                cout << "Exiting..." << endl;
+                break;
+            default:
+                cout << "Invalid choice. Please enter a valid option." << endl;
+        }
+    } while (choice != '5');
+
+    return 0;
+}
